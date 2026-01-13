@@ -1,1 +1,2 @@
-# oop2026_groupIT2516_fitness_clab-membership
+# Topic: Fitness club membership
+# Members: Saken Ashimov, Aibar Bikanov, Arsen Galym
