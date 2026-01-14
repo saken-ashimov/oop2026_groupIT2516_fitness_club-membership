@@ -6,8 +6,7 @@ public class DatabaseConnection {
     private static final String URL =
             "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require";
     private static final String USER = "postgres.dfngjfjxtcauwibocaga";
-    private s
-    tatic final String PASSWORD = "SEHCNI9_CBBreggiN";
+    private static final String PASSWORD = "SEHCNI9_CBBreggiN";
     private DatabaseConnection() {
         // no instances
     }
