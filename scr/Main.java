@@ -1,23 +1,36 @@
-import edu.aitu.oop3.db.DatabaseConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+package org.example.fitness;
+
+import Database.IDB;
+import Database.PostgresDB;
+import entities.Member;
+import repositories.MemberRepository;
+import repositories.interfaces.IMemberRepository;
+
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Connecting to Supabase...");
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            System.out.println("Connected successfully!");
-            String sql = "SELECT CURRENT_TIMESTAMP";
-            try (PreparedStatement stmt = connection.prepareStatement(sql);
-                 ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    System.out.println("Database time: " + rs.getTimestamp(1));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error while connecting to database:");
-            e.printStackTrace();
+        IDB db = new PostgresDB();
+
+        IMemberRepository repo = new MemberRepository(db);
+
+
+        System.out.println("Add member....");
+
+        Member newMember = new Member(0, "Test User", "test@mail.ru", "87771234567", null, 1);
+        boolean created = repo.createMember(newMember);
+
+        if (created) {
+            System.out.println("Cool!");
+        } else {
+            System.out.println("Error");
+        }
+
+
+        System.out.println("\nAll fat niggers:");
+        List<Member> members = repo.getAllMembers();
+        for (Member m : members) {
+            System.out.println(m);
         }
     }
 }

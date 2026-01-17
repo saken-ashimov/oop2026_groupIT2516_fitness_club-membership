@@ -1,0 +1,88 @@
+package repositories;
+
+import Database.IDB;
+import entities.Member;
+import repositories.interfaces.IMemberRepository;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemberRepository implements IMemberRepository {
+    private final IDB Database;
+
+
+    public MemberRepository(IDB db) {
+        this.Database = db;
+    }
+
+    @Override
+    public boolean createMember(Member member) {
+        Connection con = null;
+        try {
+            con = Database.getConnection();
+
+
+            String sql = "INSERT INTO members (full_name, email, phone, membership_type_id) VALUES (?, ?, ?, ?)";
+
+            PreparedStatement st = con.prepareStatement(sql);
+
+
+            st.setString(1, member.getFullName());
+            st.setString(2, member.getEmail());
+            st.setString(3, member.getPhone());
+            st.setInt(4, member.getMembershipTypeId());
+
+            st.execute();
+
+            return true;
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("SQL Error: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (con != null) con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public List<Member> getAllMembers() {
+        Connection con = null;
+        try {
+            con = Database.getConnection();
+            String sql = "SELECT id, full_name, email, phone, join_date, membership_type_id FROM members";
+            Statement st = con.createStatement();
+
+            ResultSet rs = st.executeQuery(sql);
+
+            List<Member> members = new ArrayList<>();
+
+            while (rs.next()) {
+                Member m = new Member(
+                        rs.getInt("id"),
+                        rs.getString("full_name"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getDate("join_date").toLocalDate(),
+                        rs.getInt("membership_type_id")
+                );
+                members.add(m);
+            }
+
+            return members;
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("SQL Error: " + e.getMessage());
+            return null;
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
+    @Override
+    public Member getMemberById(int id) {
+        return null;
+    }
+}
