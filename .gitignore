@@ -1,0 +1,17 @@
+
+*.class
+out/
+bin/
+
+
+.idea/
+*.iml
+*.iws
+*.ipr
+
+
+.DS_Store
+Thumbs.db
+
+
+.env
