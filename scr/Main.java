@@ -1,4 +1,3 @@
-package org.example.fitness;
 
 import Database.IDB;
 import Database.PostgresDB;
@@ -7,6 +6,7 @@ import repositories.MemberRepository;
 import repositories.interfaces.IMemberRepository;
 
 import java.util.List;
+
 
 public class Main {
     public static void main(String[] args) {
