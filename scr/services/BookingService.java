@@ -13,7 +13,7 @@ public class BookingService {
         this.classRepo = classRepo;
     }
 
-    public String makeBooking(int memberId, int classId) throws ClassFullException {
+    public String bookClass(int memberId, int classId) throws ClassFullException {
         // 1. Проверяем вместимость (Capacity)
         int currentPeople = bookingRepo.getParticipantsCount(classId);
         int maxCapacity = classRepo.getClassCapacity(classId); // Нужно добавить этот метод в репозиторий классов
