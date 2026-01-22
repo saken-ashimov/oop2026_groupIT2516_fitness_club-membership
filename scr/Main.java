@@ -1,42 +1,74 @@
-
 import Database.IDB;
 import Database.PostgresDB;
-import exceptions.ClassFullException;
-import repositories.*;
-import repositories.interfaces.*;
-import services.BookingService;
+import controllers.MemberController;
+import repositories.BookingRepository;
+import repositories.MemberRepository;
+import repositories.MembershipTypeRepository;
+import repositories.interfaces.IBookingRepository;
+import repositories.interfaces.IMemberRepository;
+import repositories.interfaces.IMembershipTypeRepository;
+
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
+        // 1. Инициализация (сборка проекта)
         IDB db = new PostgresDB();
-
-
         IMemberRepository memberRepo = new MemberRepository(db);
-        IFitnessClassRepository classRepo = new FitnessClassRepository(db);
         IBookingRepository bookingRepo = new BookingRepository(db);
+        IMembershipTypeRepository membershipRepo = new MembershipTypeRepository(db);
 
-        // 3. Инициализация сервиса (связываем логику)
-        BookingService bookingService = new BookingService(bookingRepo, classRepo);
+        // Передаем все репозитории в контроллер
+        MemberController controller = new MemberController(memberRepo, membershipRepo, bookingRepo);
 
-        // ДАННЫЕ ДЛЯ ТЕСТА (убедись, что такие ID есть в твоей БД)
-        int testMemberId = 4;
-        int testClassId = 1;
+        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("--- Старт теста системы бронирования ---");
+        // ТОТ САМЫЙ ЦИКЛ, чтобы программа не закрывалась
+        while (true) {
+            System.out.println("\n--- ГЛАВНОЕ МЕНЮ ---");
+            System.out.println("1. Зарегистрировать нового участника");
+            System.out.println("2. Найти информацию и расписание (по Email или ID)");
+            System.out.println("0. Выход");
+            System.out.print("Выберите действие: ");
 
-        try {
-            // Пробуем записать человека
-                bookingService.bookClass(testMemberId, testClassId);
-            System.out.println("✅ Результат: Запись успешно добавлена в БД.");
-        } catch (ClassFullException e) {
-            // Если сработало наше предупреждение о переполнении
-            System.err.println("❌ ОШИБКА: " + e.getMessage());
-        } catch (Exception e) {
-            // Если случилась какая-то другая ошибка (например, БД отключилась)
-            System.err.println("❌ Системная ошибка: " + e.getMessage());
+            String input = scanner.nextLine();
+
+            if (input.equals("0")) {
+                System.out.println("Завершение работы...");
+                break;
+            }
+
+            if (input.equals("1")) {
+                // Логика сбора данных
+                System.out.print("Введите имя: ");
+                String name = scanner.nextLine();
+
+                System.out.print("Введите email: ");
+                String email = scanner.nextLine();
+
+                System.out.print("Введите телефон: ");
+                String phone = scanner.nextLine();
+
+                // Контроллер выводит типы из базы
+                controller.printMembershipTypes();
+                System.out.print("Введите ID выбранного абонемента: ");
+                int typeId = Integer.parseInt(scanner.nextLine());
+
+                // Отдаем данные контроллеру на обработку
+                String result = controller.register(name, email, phone, typeId);
+                System.out.println(result);
+
+            } else if (input.equals("2")) {
+                System.out.print("Введите Email или ID пользователя: ");
+                String searchData = scanner.nextLine();
+
+                // Контроллер возвращает строку с данными и списком занятий
+                String info = controller.getMemberInfo(searchData);
+                System.out.println(info);
+            } else {
+                System.out.println("Неверный ввод, попробуйте еще раз.");
+            }
         }
-
-        System.out.println("--- Тест завершен ---");
+        scanner.close();
     }
 }

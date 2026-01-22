@@ -43,13 +43,13 @@ public class BookingRepository implements IBookingRepository {
         // Нужно, чтобы знать, не переполнен ли класс
         return 0;
     }
-    // Метод для получения списка названий занятий по ID студента
+    @Override
     public List<String> getClassesByMemberId(int memberId) {
-        List<String> classNames = new ArrayList<>();
+        List<String> classes = new ArrayList<>();
         Connection con = null;
         try {
             con = db.getConnection();
-            // JOIN запрос для получения данных из двух таблиц [cite: 30]
+            // Делаем JOIN, чтобы достать названия занятий для этого пользователя
             String sql = "SELECT f.title, f.schedule_time " +
                     "FROM class_bookings cb " +
                     "JOIN fitness_classes f ON cb.class_id = f.id " +
@@ -60,14 +60,18 @@ public class BookingRepository implements IBookingRepository {
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                classNames.add(rs.getString("title") + " at " + rs.getTimestamp("schedule_time"));
+                String classInfo = rs.getString("title") + " (Time: " + rs.getTimestamp("schedule_time") + ")";
+                classes.add(classInfo);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try { if (con != null) con.close(); } catch (SQLException e) {}
         }
-        return classNames;
+        return classes;
     }
+
+
+
 
 }
