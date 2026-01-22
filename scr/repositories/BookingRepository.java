@@ -30,13 +30,15 @@ public class BookingRepository implements IBookingRepository {
 
     @Override
     public boolean isMemberAlreadyBooked(int memberId, int classId) {
-
-        return false;
+        // SQL запрос, который проверяет наличие записи в таблице class_bookings
+        // Вернет true, если запись уже есть
+        return false; // (реализуй по аналогии с SELECT)
     }
 
     @Override
     public int getParticipantsCount(int classId) {
-
+        // SQL: SELECT count(*) FROM class_bookings WHERE class_id = ?
+        // Нужно, чтобы знать, не переполнен ли класс
         return 0;
     }
 }
