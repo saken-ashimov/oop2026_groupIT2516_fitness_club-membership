@@ -85,4 +85,33 @@ public class MemberRepository implements IMemberRepository {
     public Member getMemberById(int id) {
         return null;
     }
+
+    // Вставь этот метод внутрь класса MemberRepository
+    @Override
+    public Member getMemberByEmail(String email) {
+        Connection con = null;
+        try {
+            con = Database.getConnection(); // [cite: 14] Use IDB interface
+            String sql = "SELECT * FROM members WHERE email = ?";
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setString(1, email);
+            ResultSet rs = st.executeQuery();
+
+            if (rs.next()) {
+                return new Member(
+                        rs.getInt("id"),
+                        rs.getString("full_name"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getDate("join_date").toLocalDate(),
+                        rs.getInt("membership_type_id")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // [cite: 19] Handle exceptions
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) {}
+        }
+        return null;
+    }
 }
