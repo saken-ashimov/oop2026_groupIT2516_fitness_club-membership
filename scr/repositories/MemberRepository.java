@@ -3,6 +3,7 @@ package repositories;
 import Database.IDB;
 import entities.Member;
 import repositories.interfaces.IMemberRepository;
+import exceptions.DuplicateMemberException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class MemberRepository implements IMemberRepository {
     }
 
     @Override
-    public boolean createMember(Member member) {
+    public boolean createMember(Member member) throws DuplicateMemberException {
         Connection con = null;
         try {
             con = Database.getConnection();
@@ -37,6 +38,9 @@ public class MemberRepository implements IMemberRepository {
 
             return true;
         } catch (SQLException | ClassNotFoundException e) {
+            if (e instanceof SQLException && "23505".equals(((SQLException) e).getSQLState())) {
+                throw new DuplicateMemberException("Пользователь с таким email или телефоном уже существует.");
+            }
             System.out.println("SQL Error: " + e.getMessage());
             return false;
         } finally {
@@ -83,6 +87,29 @@ public class MemberRepository implements IMemberRepository {
 
     @Override
     public Member getMemberById(int id) {
+        Connection con = null;
+        try {
+            con = Database.getConnection();
+            String sql = "SELECT * FROM members WHERE id = ?";
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, id);
+            ResultSet rs = st.executeQuery();
+
+            if (rs.next()) {
+                return new Member(
+                        rs.getInt("id"),
+                        rs.getString("full_name"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getDate("join_date").toLocalDate(),
+                        rs.getInt("membership_type_id")
+                );
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("SQL Error: " + e.getMessage());
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
         return null;
     }
 
@@ -114,4 +141,32 @@ public class MemberRepository implements IMemberRepository {
         }
         return null;
     }
+    @Override
+    public Member getMemberByPhone(String phone) {
+        Connection con = null;
+        try {
+            con = Database.getConnection();
+            String sql = "SELECT * FROM members WHERE phone = ?";
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setString(1, phone);
+            ResultSet rs = st.executeQuery();
+
+            if (rs.next()) {
+                return new Member(
+                        rs.getInt("id"),
+                        rs.getString("full_name"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getDate("join_date").toLocalDate(),
+                        rs.getInt("membership_type_id")
+                );
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("SQL Error: " + e.getMessage());
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return null;
+    }
+
 }

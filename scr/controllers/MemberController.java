@@ -2,6 +2,7 @@ package controllers;
 
 import entities.Member;
 import entities.MembershipType;
+import exceptions.DuplicateMemberException;
 import repositories.interfaces.IMemberRepository;
 import repositories.interfaces.IMembershipTypeRepository;
 import repositories.interfaces.IBookingRepository;
@@ -41,27 +42,33 @@ public class MemberController {
         Member m = new Member(0, name, email, phone, LocalDate.now(), typeId);
 
         // Отдаем репозиторию на сохранение
-        boolean success = memberRepo.createMember(m);
+        try {
+            boolean success = memberRepo.createMember(m);
+            return success ? "Успешно: Участник зарегистрирован!" : "Ошибка: Не удалось сохранить в базу.";
+        } catch (DuplicateMemberException e) {
+            return "Ошибка: " + e.getMessage();
+        }
+    }
 
-        return success ? "Успешно: Участник зарегистрирован!" : "Ошибка: Не удалось сохранить в базу.";
+    // 4. Поиск участника
+    public Member findMember(String input) {
+        if (input.contains("@")) {
+            return memberRepo.getMemberByEmail(input);
+        } else if (input.startsWith("+") || input.replaceAll("\\D", "").length() >= 10) {
+            return memberRepo.getMemberByPhone(input);
+        } else {
+            try {
+                int id = Integer.parseInt(input);
+                return memberRepo.getMemberById(id);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
     }
 
     // 3. Метод для получения инфо и расписания (getMemberInfo)
     public String getMemberInfo(String input) {
-        Member member;
-
-        // Логика: если в строке есть @, ищем по email, иначе по ID
-        if (input.contains("@")) {
-            member = memberRepo.getMemberByEmail(input);
-        } else {
-            try {
-                int id = Integer.parseInt(input);
-                member = memberRepo.getMemberById(id);
-            } catch (NumberFormatException e) {
-                return "Ошибка: Введите корректный ID или Email.";
-            }
-        }
-
+        Member member = findMember(input);
         if (member == null) return "Пользователь не найден.";
 
         // Получаем список занятий через JOIN в BookingRepository

@@ -32,15 +32,42 @@ public class BookingRepository implements IBookingRepository {
 
     @Override
     public boolean isMemberAlreadyBooked(int memberId, int classId) {
-        // SQL запрос, который проверяет наличие записи в таблице class_bookings
-        // Вернет true, если запись уже есть
-        return false; // (реализуй по аналогии с SELECT)
+        Connection con = null;
+        try {
+            con = db.getConnection();
+            String sql = "SELECT COUNT(*) FROM class_bookings WHERE member_id = ? AND class_id = ?";
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, memberId);
+            st.setInt(2, classId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) {}
+        }
+        return false;
     }
 
     @Override
     public int getParticipantsCount(int classId) {
-        // SQL: SELECT count(*) FROM class_bookings WHERE class_id = ?
-        // Нужно, чтобы знать, не переполнен ли класс
+        Connection con = null;
+        try {
+            con = db.getConnection();
+            String sql = "SELECT COUNT(*) FROM class_bookings WHERE class_id = ?";
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, classId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) {}
+        }
         return 0;
     }
     @Override
