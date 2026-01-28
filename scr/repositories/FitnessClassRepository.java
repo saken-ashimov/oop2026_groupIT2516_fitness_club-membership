@@ -60,7 +60,7 @@ public class FitnessClassRepository implements IFitnessClassRepository {
         } finally {
             try { if (con != null) con.close(); } catch (SQLException e) {}
         }
-        return 0; // Если класс не найден
+        return 0; // if class isn't founded
     }
 
     @Override

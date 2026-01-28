@@ -76,7 +76,7 @@ public class BookingRepository implements IBookingRepository {
         Connection con = null;
         try {
             con = db.getConnection();
-            // Делаем JOIN, чтобы достать названия занятий для этого пользователя
+            // Use JOIN to select classes for this user
             String sql = "SELECT f.title, f.schedule_time " +
                     "FROM class_bookings cb " +
                     "JOIN fitness_classes f ON cb.class_id = f.id " +

@@ -14,21 +14,21 @@ public class BookingService {
     }
 
     public String bookClass(int memberId, int classId) throws ClassFullException {
-        // 1. Проверяем вместимость (Capacity)
+        // Check capacity
         int currentPeople = bookingRepo.getParticipantsCount(classId);
         int maxCapacity = classRepo.getClassCapacity(classId); // Нужно добавить этот метод в репозиторий классов
 
         if (currentPeople >= maxCapacity) {
-            throw new ClassFullException("Извините, на эту тренировку мест больше нет!");
+            throw new ClassFullException("Sorry, this class is full!");
         }
 
-        // 2. Проверяем, не записан ли он уже
+        //  Chek for booking
         if (bookingRepo.isMemberAlreadyBooked(memberId, classId)) {
-            return "Вы уже записаны на это занятие.";
+            return "You already attend this class.";
         }
 
-        // 3. Если всё ок — записываем
+        // If previous good - make booking
         boolean success = bookingRepo.bookMemberToClass(memberId, classId);
-        return success ? "Успешная запись!" : "Ошибка при записи.";
+        return success ? "Booking is successful!" : "Recording error.";
     }
 }

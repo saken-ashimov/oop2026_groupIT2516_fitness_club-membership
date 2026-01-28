@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class PostgresDB implements IDB {
-    private String username = "postgres.dfngjfjxtcauwibocaga"; // твой логин (обычно postgres)
-    private String password =  loadPassword();     // ТВОЙ ПАРОЛЬ
+    private String username = "postgres.dfngjfjxtcauwibocaga";
+    private String password =  loadPassword();
     private static String loadPassword() {
         Properties props = new Properties();
         try (InputStream input = new FileInputStream("config.properties")) {

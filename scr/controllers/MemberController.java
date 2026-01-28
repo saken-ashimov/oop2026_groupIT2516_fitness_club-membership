@@ -22,35 +22,32 @@ public class MemberController {
         this.bookingRepo = bookingRepo;
     }
 
-    // 1. Метод для вывода типов абонементов (тот самый PrintMembershipTypes)
+    // 1. For given Membership types
     public void printMembershipTypes() {
         List<MembershipType> types = membershipRepo.getAllMembershipTypes();
         if (types == null || types.isEmpty()) {
-            System.out.println("Список абонементов пуст.");
+            System.out.println("Not membership types found.");
             return;
         }
-        System.out.println("\nДоступные абонементы:");
+        System.out.println("\nOur Membership Types:");
         for (MembershipType t : types) {
-            // Использует toString() из твоего класса MembershipType
             System.out.println(t.getId() + ". " + t.toString());
         }
     }
 
-    // 2. Метод для регистрации (register)
+    // 2. Registration
     public String register(String name, String email, String phone, int typeId) {
-        // Создаем объект сущности (Entity)
         Member m = new Member(0, name, email, phone, LocalDate.now(), typeId);
 
-        // Отдаем репозиторию на сохранение
         try {
             boolean success = memberRepo.createMember(m);
-            return success ? "Успешно: Участник зарегистрирован!" : "Ошибка: Не удалось сохранить в базу.";
+            return success ? "Add Member!" : "Error: Can't insert to BD.";
         } catch (DuplicateMemberException e) {
-            return "Ошибка: " + e.getMessage();
+            return "Error: " + e.getMessage();
         }
     }
 
-    // 4. Поиск участника
+    // 4. Find Member
     public Member findMember(String input) {
         if (input.contains("@")) {
             return memberRepo.getMemberByEmail(input);
@@ -66,22 +63,22 @@ public class MemberController {
         }
     }
 
-    // 3. Метод для получения инфо и расписания (getMemberInfo)
+    // 3. User attendance history
     public String getMemberInfo(String input) {
         Member member = findMember(input);
-        if (member == null) return "Пользователь не найден.";
+        if (member == null) return "Member not found.";
 
-        // Получаем список занятий через JOIN в BookingRepository
+        // get class booking by JOIN in BookingRepository
         List<String> classes = bookingRepo.getClassesByMemberId(member.getId());
 
         StringBuilder sb = new StringBuilder();
-        sb.append("\n=== Информация о пользователе ===\n");
-        sb.append("Имя: ").append(member.getFullName()).append("\n");
+        sb.append("\n=== Info about Member ===\n");
+        sb.append("Name: ").append(member.getFullName()).append("\n");
         sb.append("Email: ").append(member.getEmail()).append("\n");
-        sb.append("Расписание занятий:\n");
+        sb.append("Class booking:\n");
 
         if (classes.isEmpty()) {
-            sb.append("- Нет активных записей на тренировки.");
+            sb.append("- Not booking.");
         } else {
             for (String c : classes) {
                 sb.append("- ").append(c).append("\n");

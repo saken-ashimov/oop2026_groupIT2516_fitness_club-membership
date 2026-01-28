@@ -37,7 +37,7 @@ public class MembershipTypeRepository implements IMembershipTypeRepository {
 
     @Override
     public MembershipType getMembershipTypeById(int id) {
-        // Добавим этот метод для полноты картины
+
         try (Connection con = db.getConnection();
              PreparedStatement st = con.prepareStatement("SELECT * FROM membership_types WHERE id = ?")) {
             st.setInt(1, id);

@@ -39,7 +39,7 @@ public class MemberRepository implements IMemberRepository {
             return true;
         } catch (SQLException | ClassNotFoundException e) {
             if (e instanceof SQLException && "23505".equals(((SQLException) e).getSQLState())) {
-                throw new DuplicateMemberException("Пользователь с таким email или телефоном уже существует.");
+                throw new DuplicateMemberException("Member with these email or phone number already exist.");
             }
             System.out.println("SQL Error: " + e.getMessage());
             return false;
@@ -113,7 +113,6 @@ public class MemberRepository implements IMemberRepository {
         return null;
     }
 
-    // Вставь этот метод внутрь класса MemberRepository
     @Override
     public Member getMemberByEmail(String email) {
         Connection con = null;

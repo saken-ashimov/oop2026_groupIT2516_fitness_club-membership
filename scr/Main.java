@@ -16,86 +16,86 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        // 1. Инициализация (сборка проекта)
+        // 1 Initialization
         IDB db = new PostgresDB();
         IMemberRepository memberRepo = new MemberRepository(db);
         IBookingRepository bookingRepo = new BookingRepository(db);
         IMembershipTypeRepository membershipRepo = new MembershipTypeRepository(db);
         IFitnessClassRepository classRepo = new FitnessClassRepository(db);
 
-        // Контроллеры
+        // Controllers
         MemberController memberController = new MemberController(memberRepo, membershipRepo, bookingRepo);
         BookingController bookingController = new BookingController(bookingRepo, classRepo);
 
         Scanner scanner = new Scanner(System.in);
 
-        // ТОТ САМЫЙ ЦИКЛ, чтобы программа не закрывалась
+        // CLI
         while (true) {
-            System.out.println("\n--- ГЛАВНОЕ МЕНЮ ---");
-            System.out.println("1. Зарегистрировать нового участника");
-            System.out.println("2. Найти информацию и расписание (по Email, телефону или ID)");
-            System.out.println("3. Записаться на занятие");
-            System.out.println("0. Выход");
-            System.out.print("Выберите действие: ");
+            System.out.println("\n--- MAIN MENU ---");
+            System.out.println("1. Add new member");
+            System.out.println("2. Chech for member attendance history  (by Email of phone)");
+            System.out.println("3. Sign up for a class");
+            System.out.println("0. Exit");
+            System.out.print("Choose option: ");
 
             String input = scanner.nextLine();
 
             if (input.equals("0")) {
-                System.out.println("Завершение работы...");
+                System.out.println("Completion of work...");
                 break;
             }
 
             if (input.equals("1")) {
                 // Логика сбора данных
-                System.out.print("Введите имя: ");
+                System.out.print("Enter a name: ");
                 String name = scanner.nextLine();
 
-                System.out.print("Введите email: ");
+                System.out.print("Enter an email: ");
                 String email = scanner.nextLine();
 
-                System.out.print("Введите телефон: ");
+                System.out.print("Enter a phone number: ");
                 String phone = scanner.nextLine();
 
-                // Контроллер выводит типы из базы
+                // Print all membership type
                 memberController.printMembershipTypes();
-                System.out.print("Введите ID выбранного абонемента: ");
+                System.out.print("Enter the id of your choice: ");
                 int typeId = Integer.parseInt(scanner.nextLine());
 
-                // Отдаем данные контроллеру на обработку
+                // Give information to controllers
                 String result = memberController.register(name, email, phone, typeId);
                 System.out.println(result);
 
             } else if (input.equals("2")) {
-                System.out.print("Введите Email, телефон или ID пользователя: ");
+                System.out.print("Enter the Members's Email or phone number: ");
                 String searchData = scanner.nextLine();
 
-                // Контроллер возвращает строку с данными и списком занятий
+
                 String info = memberController.getMemberInfo(searchData);
                 System.out.println(info);
             } else if (input.equals("3")) {
-                System.out.print("Введите Email, телефон или ID пользователя для записи: ");
+                System.out.print("Enter the Member's email or phone number: ");
                 String searchData = scanner.nextLine();
 
                 Member member = memberController.findMember(searchData);
                 if (member == null) {
-                    System.out.println("Пользователь не найден!");
+                    System.out.println("Member is not founded!");
                     continue;
                 }
 
-                System.out.println("Привет, " + member.getFullName() + "!");
+                System.out.println("Hello, " + member.getFullName() + "!");
                 bookingController.printAllClasses();
 
-                System.out.print("Введите ID выбранной тренировки: ");
+                System.out.print("Enter the id of class: ");
                 try {
                     int classId = Integer.parseInt(scanner.nextLine());
                     String result = bookingController.bookClass(member.getId(), classId);
                     System.out.println(result);
                 } catch (NumberFormatException e) {
-                    System.out.println("Ошибка: Введите числовой ID.");
+                    System.out.println("Error: Enter an INTEGER ID.");
                 }
 
             } else {
-                System.out.println("Неверный ввод, попробуйте еще раз.");
+                System.out.println("Wrong input, try again.");
             }
         }
         scanner.close();

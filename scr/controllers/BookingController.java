@@ -22,10 +22,10 @@ public class BookingController {
     public void printAllClasses() {
         List<FitnessClass> classes = classRepo.getAllClasses();
         if (classes == null || classes.isEmpty()) {
-            System.out.println("Нет доступных тренировок.");
+            System.out.println("Not class available.");
             return;
         }
-        System.out.println("\nДоступные тренировки:");
+        System.out.println("\nClasses:");
         for (FitnessClass fc : classes) {
             System.out.println(fc.toString());
         }
@@ -35,7 +35,7 @@ public class BookingController {
         try {
             return bookingService.bookClass(memberId, classId);
         } catch (ClassFullException e) {
-            return "Ошибка: " + e.getMessage();
+            return "Error: " + e.getMessage();
         }
     }
 
@@ -43,10 +43,10 @@ public class BookingController {
         List<String> classes = bookingRepo.getClassesByMemberId(memberId);
 
         if (classes == null || classes.isEmpty()) {
-            return "У пользователя нет активных записей.";
+            return "User haven't classes.";
         }
 
-        StringBuilder sb = new StringBuilder("Расписание участника:\n");
+        StringBuilder sb = new StringBuilder("Users booking:\n");
         for (String className : classes) {
             sb.append("- ").append(className).append("\n");
         }
