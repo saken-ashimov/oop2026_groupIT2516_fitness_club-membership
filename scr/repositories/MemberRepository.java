@@ -168,4 +168,22 @@ public class MemberRepository implements IMemberRepository {
         return null;
     }
 
+    @Override
+    public boolean updateMembership(int memberId, int membershipTypeId, java.time.LocalDate joinDate) {
+        Connection con = null;
+        try {
+            con = Database.getConnection();
+            String sql = "UPDATE members SET membership_type_id = ?, join_date = ? WHERE id = ?";
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1, membershipTypeId);
+            st.setDate(2, Date.valueOf(joinDate));
+            st.setInt(3, memberId);
+            return st.executeUpdate() > 0;
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("SQL Error: " + e.getMessage());
+            return false;
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
 }

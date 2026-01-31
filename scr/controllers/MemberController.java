@@ -68,6 +68,12 @@ public class MemberController {
         Member member = findMember(input);
         if (member == null) return "Member not found.";
 
+        MembershipType membershipType = membershipRepo.getMembershipTypeById(member.getMembershipTypeId());
+        LocalDate expirationDate = null;
+        if (membershipType != null) {
+            expirationDate = member.getJoinDate().plusMonths(membershipType.getDurationMonths());
+        }
+
         // get class booking by JOIN in BookingRepository
         List<String> classes = bookingRepo.getClassesByMemberId(member.getId());
 
@@ -75,6 +81,12 @@ public class MemberController {
         sb.append("\n=== Info about Member ===\n");
         sb.append("Name: ").append(member.getFullName()).append("\n");
         sb.append("Email: ").append(member.getEmail()).append("\n");
+        if (membershipType != null) {
+            sb.append("Membership: ").append(membershipType.getName()).append("\n");
+            sb.append("Valid until: ").append(expirationDate).append("\n");
+        } else {
+            sb.append("Membership: Unknown\n");
+        }
         sb.append("Class booking:\n");
 
         if (classes.isEmpty()) {
@@ -86,5 +98,19 @@ public class MemberController {
         }
 
         return sb.toString();
+    }
+    public String renewMembership(String input, int typeId) {
+        Member member = findMember(input);
+        if (member == null) return "Member not found.";
+
+        MembershipType type = membershipRepo.getMembershipTypeById(typeId);
+        if (type == null) return "Membership type not found.";
+
+        LocalDate renewalDate = LocalDate.now();
+        boolean success = memberRepo.updateMembership(member.getId(), typeId, renewalDate);
+        if (!success) return "Error: Can't update membership.";
+
+        LocalDate newExpiration = renewalDate.plusMonths(type.getDurationMonths());
+        return "Membership renewed until " + newExpiration + ".";
     }
 }

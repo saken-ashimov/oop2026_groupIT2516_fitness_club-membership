@@ -11,4 +11,5 @@ public interface IMemberRepository {
     List<Member> getAllMembers();
     Member getMemberByEmail(String email);
     Member getMemberByPhone(String phone);
+    boolean updateMembership(int memberId, int membershipTypeId, java.time.LocalDate joinDate);
 }
