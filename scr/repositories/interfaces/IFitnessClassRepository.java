@@ -7,5 +7,5 @@ public interface IFitnessClassRepository {
     FitnessClass getClassById(int id);
     List<FitnessClass> getAllClasses();
     int getClassCapacity(int id);
+    boolean addClass(FitnessClass fitnessClass);
 }
-

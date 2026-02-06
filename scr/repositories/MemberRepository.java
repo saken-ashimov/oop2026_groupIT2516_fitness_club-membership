@@ -2,26 +2,51 @@ package repositories;
 
 import Database.IDB;
 import entities.Member;
-import repositories.interfaces.IMemberRepository;
 import exceptions.DuplicateMemberException;
+import repositories.interfaces.IMemberRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemberRepository implements IMemberRepository {
-    private final IDB Database;
-
-
+public class MemberRepository extends PostgresRepository<Member> implements IMemberRepository {
     public MemberRepository(IDB db) {
-        this.Database = db;
+        super(db);
     }
+
+    @Override
+    protected String getTableName() {
+        return "members";
+    }
+
+    @Override
+    protected Member mapResultSetToEntity(ResultSet rs) throws SQLException {
+        Date joinDate = rs.getDate("join_date");
+        return new Member(
+                rs.getInt("id"),
+                rs.getString("full_name"),
+                rs.getString("email"),
+                rs.getString("phone"),
+                joinDate == null ? null : joinDate.toLocalDate(),
+                rs.getInt("membership_type_id")
+        );
+    }
+
+    @Override
+    public boolean add(Member entity) {
+        try {
+            return createMember(entity);
+        } catch (DuplicateMemberException e) {
+            return false;
+        }
+    }
+
 
     @Override
     public boolean createMember(Member member) throws DuplicateMemberException {
         Connection con = null;
         try {
-            con = Database.getConnection();
+            con = db.getConnection();
 
 
             String sql = "INSERT INTO members (full_name, email, phone, membership_type_id) VALUES (?, ?, ?, ?)";
@@ -54,87 +79,29 @@ public class MemberRepository implements IMemberRepository {
 
     @Override
     public List<Member> getAllMembers() {
-        Connection con = null;
-        try {
-            con = Database.getConnection();
-            String sql = "SELECT id, full_name, email, phone, join_date, membership_type_id FROM members";
-            Statement st = con.createStatement();
-
-            ResultSet rs = st.executeQuery(sql);
-
-            List<Member> members = new ArrayList<>();
-
-            while (rs.next()) {
-                Member m = new Member(
-                        rs.getInt("id"),
-                        rs.getString("full_name"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getDate("join_date").toLocalDate(),
-                        rs.getInt("membership_type_id")
-                );
-                members.add(m);
-            }
-
-            return members;
-        } catch (SQLException | ClassNotFoundException e) {
-            System.out.println("SQL Error: " + e.getMessage());
-            return null;
-        } finally {
-            try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
-        }
+        return getAll();
     }
 
     @Override
     public Member getMemberById(int id) {
-        Connection con = null;
-        try {
-            con = Database.getConnection();
-            String sql = "SELECT * FROM members WHERE id = ?";
-            PreparedStatement st = con.prepareStatement(sql);
-            st.setInt(1, id);
-            ResultSet rs = st.executeQuery();
-
-            if (rs.next()) {
-                return new Member(
-                        rs.getInt("id"),
-                        rs.getString("full_name"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getDate("join_date").toLocalDate(),
-                        rs.getInt("membership_type_id")
-                );
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            System.out.println("SQL Error: " + e.getMessage());
-        } finally {
-            try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
-        }
-        return null;
+        return getById(id);
     }
 
     @Override
     public Member getMemberByEmail(String email) {
         Connection con = null;
         try {
-            con = Database.getConnection(); // [cite: 14] Use IDB interface
+            con = db.getConnection();
             String sql = "SELECT * FROM members WHERE email = ?";
             PreparedStatement st = con.prepareStatement(sql);
             st.setString(1, email);
             ResultSet rs = st.executeQuery();
 
             if (rs.next()) {
-                return new Member(
-                        rs.getInt("id"),
-                        rs.getString("full_name"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getDate("join_date").toLocalDate(),
-                        rs.getInt("membership_type_id")
-                );
+                return mapResultSetToEntity(rs);
             }
         } catch (Exception e) {
-            e.printStackTrace(); // [cite: 19] Handle exceptions
+            e.printStackTrace();
         } finally {
             try { if (con != null) con.close(); } catch (SQLException e) {}
         }
@@ -144,21 +111,14 @@ public class MemberRepository implements IMemberRepository {
     public Member getMemberByPhone(String phone) {
         Connection con = null;
         try {
-            con = Database.getConnection();
+            con = db.getConnection();
             String sql = "SELECT * FROM members WHERE phone = ?";
             PreparedStatement st = con.prepareStatement(sql);
             st.setString(1, phone);
             ResultSet rs = st.executeQuery();
 
             if (rs.next()) {
-                return new Member(
-                        rs.getInt("id"),
-                        rs.getString("full_name"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getDate("join_date").toLocalDate(),
-                        rs.getInt("membership_type_id")
-                );
+                return mapResultSetToEntity(rs);
             }
         } catch (SQLException | ClassNotFoundException e) {
             System.out.println("SQL Error: " + e.getMessage());
@@ -172,7 +132,7 @@ public class MemberRepository implements IMemberRepository {
     public boolean updateMembership(int memberId, int membershipTypeId, java.time.LocalDate joinDate) {
         Connection con = null;
         try {
-            con = Database.getConnection();
+            con = db.getConnection();
             String sql = "UPDATE members SET membership_type_id = ?, join_date = ? WHERE id = ?";
             PreparedStatement st = con.prepareStatement(sql);
             st.setInt(1, membershipTypeId);

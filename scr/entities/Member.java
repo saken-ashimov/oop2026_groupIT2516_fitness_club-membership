@@ -44,4 +44,46 @@ public class Member {
     public String toString() {
         return "ID: " + id + " | Name: " + fullName + " | Email: " + email;
     }
+
+    public static class Builder {
+        private int id;
+        private String fullName;
+        private String email;
+        private String phone;
+        private LocalDate joinDate;
+        private int membershipTypeId;
+
+        public Builder setId(int id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setFullName(String fullName) {
+            this.fullName = fullName;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+        public Builder setPhone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Builder setJoinDate(LocalDate joinDate) {
+            this.joinDate = joinDate;
+            return this;
+        }
+
+        public Builder setMembershipTypeId(int membershipTypeId) {
+            this.membershipTypeId = membershipTypeId;
+            return this;
+        }
+
+        public Member build() {
+            return new Member(id, fullName, email, phone, joinDate, membershipTypeId);
+        }
+    }
 }

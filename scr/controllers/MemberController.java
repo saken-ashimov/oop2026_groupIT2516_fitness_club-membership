@@ -1,6 +1,7 @@
 package controllers;
 
 import entities.Member;
+import entities.MemberFactory;
 import entities.MembershipType;
 import exceptions.DuplicateMemberException;
 import repositories.interfaces.IMemberRepository;
@@ -37,7 +38,7 @@ public class MemberController {
 
     // 2. Registration
     public String register(String name, String email, String phone, int typeId) {
-        Member m = new Member(0, name, email, phone, LocalDate.now(), typeId);
+        Member m = MemberFactory.createMember(name, email, phone, typeId);
 
         try {
             boolean success = memberRepo.createMember(m);
