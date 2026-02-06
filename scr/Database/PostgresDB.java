@@ -9,35 +9,48 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class PostgresDB implements IDB {
+    // A static field
+    private static PostgresDB instance;
+    private Connection connection;
+
     private String username = "postgres.dfngjfjxtcauwibocaga";
-    private String password =  loadPassword();
+    private String password = loadPassword();
+
+    //private constructor
+    private PostgresDB() {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Public static method
+    public static synchronized PostgresDB getInstance() {
+        if (instance == null) {
+            instance = new PostgresDB();
+        }
+        return instance;
+    }
+
     private static String loadPassword() {
         Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
+        try (InputStream input = new FileInputStream("config.properties")) { //
             props.load(input);
             String value = props.getProperty("DB_PASSWORD");
-            if (value == null || value.isBlank()) {
-                throw new RuntimeException("DB_PASSWORD is not set in config.properties");
-            }
+            if (value == null || value.isBlank()) throw new RuntimeException("DB_PASSWORD missing");
             return value;
         } catch (IOException e) {
-            throw new RuntimeException("Cannot load DB_PASSWORD from config.properties", e);
+            throw new RuntimeException("Config error", e);
         }
     }
 
     @Override
     public Connection getConnection() throws SQLException, ClassNotFoundException {
-        String connectionUrl = "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require";
-
-        try {
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(connectionUrl, username, password);
-
-            return connection;
-        } catch (Exception e) {
-            System.out.println("Failed to connect to database!");
-            e.printStackTrace();
-            throw e; //
+        if (connection == null || connection.isClosed()) {
+            String connectionUrl = "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require"; //
+            connection = DriverManager.getConnection(connectionUrl, username, password);
         }
+        return connection;
     }
 }

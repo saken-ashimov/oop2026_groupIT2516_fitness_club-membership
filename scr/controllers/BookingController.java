@@ -26,9 +26,7 @@ public class BookingController {
             return;
         }
         System.out.println("\nClasses:");
-        for (FitnessClass fc : classes) {
-            System.out.println(fc.toString());
-        }
+        classes.forEach(fc -> System.out.println(fc.toString()));
     }
 
     public String bookClass(int memberId, int classId) {
