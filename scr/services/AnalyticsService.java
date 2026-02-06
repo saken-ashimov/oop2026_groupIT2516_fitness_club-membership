@@ -3,6 +3,7 @@ package services;
 import entities.FitnessClass;
 import repositories.interfaces.IFitnessClassRepository;
 import repositories.interfaces.IBookingRepository;
+import java.util.Map;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -32,14 +33,17 @@ public class AnalyticsService {
                 .forEach(fc -> System.out.println("- " + fc));
 
         System.out.println("Two classes with the lowest attendance:");
+        Map<Integer, Integer> counts = bookingRepository.getClassParticipantCounts();
+
         classRepository.getAllClasses()
                 .stream()
+                // 2. Сортируем, беря данные из Map (операция в памяти, очень быстрая)
                 .sorted((a, b) -> Integer.compare(
-                        bookingRepository.getParticipantsCount(a.getId()),
-                        bookingRepository.getParticipantsCount(b.getId())
+                        counts.getOrDefault(a.getId(), 0),
+                        counts.getOrDefault(b.getId(), 0)
                 ))
                 .limit(2)
                 .forEach(fc -> System.out.println("- " + fc + " | Participants: "
-                        + bookingRepository.getParticipantsCount(fc.getId())));
+                        + counts.getOrDefault(fc.getId(), 0))); // Тут тоже берем из памяти
     }
 }

@@ -4,7 +4,9 @@ import Database.IDB;
 import repositories.interfaces.IBookingRepository;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BookingRepository implements IBookingRepository {
     private final IDB db;
@@ -96,9 +98,29 @@ public class BookingRepository implements IBookingRepository {
             try { if (con != null) con.close(); } catch (SQLException e) {}
         }
         return classes;
+
     }
 
-
+    @Override
+    public Map<Integer, Integer> getClassParticipantCounts() {
+        Map<Integer, Integer> counts = new HashMap<>();
+        Connection con = null;
+        try {
+            con = db.getConnection();
+            // Получаем ID класса и количество людей в нем одним запросом
+            String sql = "SELECT class_id, COUNT(*) as cnt FROM class_bookings GROUP BY class_id";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                counts.put(rs.getInt("class_id"), rs.getInt("cnt"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException e) {}
+        }
+        return counts;
+    }
 
 
 }
